@@ -108,6 +108,10 @@ int main()
             }
             fclose(encabezadoVentas);
             fclose(detalle_venta);
+            break;
+        
+        case 'b':
+            break;
     }
     return 0;
 }
