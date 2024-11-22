@@ -13,7 +13,7 @@ int main()
     FILE *encabezadoVentas, *detalle_venta;
     char numeroVenta[100], numeroVenta2[100], nombre[80], nombre2[80], fecha[50], descripcion[100], continuar, claveArticulo[20],claveArticulo2[20];
     int claveCliente, consecutivo = 1, cantidad;
-    char vistos[150][20];
+    char vistos[150][20],otroArticulo;
     float precio, total = 0;
     bool encontrado = false;
     regex patronVenta("^V\\d{2}-[1-9]$");
@@ -29,6 +29,9 @@ int main()
     switch (opcion) 
     {
         case 'a':
+            do {
+
+
             try 
             {
                 encabezadoVentas = fopen("encabezado_venta.txt", "a+");
@@ -108,10 +111,15 @@ int main()
                     while (continuar != 'N');
                 }
             }
+
             catch (const char *e) 
             {
                 cout << e;
             }
+            cout<<"Desea agregar otro articulo?"<<endl;
+            cin>>otroArticulo;
+            }while(otroArticulo!='s');
+
             fclose(encabezadoVentas);
             fclose(detalle_venta);
             break;
@@ -131,6 +139,8 @@ int main()
                 }while(!regex_match(claveArticulo2,patronArticulo));
 
                 cout << left << setw(20) << "Descripcion"<< setw(15) << "Fecha"<< setw(20) << "Numero de venta"<< setw(15) << "Clave cliente"<< setw(20) << "Nombre cliente"<< setw(10) << "Cantidad"<< setw(10) << "Precio"<< setw(10) << "Subtotal" << endl;
+                try {
+
 
                 while (fscanf(detalle_venta, "%s %d %s |%[^|]| %d %f", numeroVenta, &consecutivo, claveArticulo, descripcion, &cantidad, &precio) == 6)
                 {
@@ -139,23 +149,35 @@ int main()
                     {
                         rewind(encabezadoVentas);
 
-                        while (fscanf(encabezadoVentas, "%s %d |%[^|]| %s", numeroVenta2, &claveCliente, nombre, fecha) == 4 )
+                        while (fscanf(encabezadoVentas, "%s %d |%[^|]| %s", numeroVenta2, &claveCliente, nombre, fecha) == 4 &&!encontrado )
                         {
+
                             if(strcmp(numeroVenta,numeroVenta2)==0) {
+                                encontrado=true;
                                 cout << left << setw(20) << descripcion
                                << setw(15) << fecha
                                << setw(20) << numeroVenta
                                << setw(15) << claveCliente
                                << setw(20) << nombre
                                << setw(10) << cantidad
-                               << setw(10) << fixed << setprecision(2) << precio
-                               << setw(10) << fixed << setprecision(2) << (cantidad * precio) << endl;
+                               << setw(10) << fixed << setprecision(2) << precio;
+                                if (cantidad > 1e6 || precio > 1e6) {
+                                    throw "El cálculo del subtotal puede causar desbordamiento.";
+                                }
+                               cout<< setw(10) << fixed << setprecision(2) << (cantidad * precio) << endl;
                             }
 
                         }
+                        if(!encontrado) {
+                            throw "No se encontro los datos en la cabezera";
+                        }
+
 
 
                     }
+                }
+                }catch(const char *e) {
+                    cout<<e;
                 }
 
 
