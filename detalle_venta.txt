@@ -1,1 +1,6 @@
 V12-1 1 12 |hola buenas tardes| 49 2.000000
+V32-2 1 34 |producto en buen estado| 12 23.000000
+V21-2 1 90 |articulo asqueroso de mierda| 23 90.000000
+V12-4 1 34 |dasdasda| 34 2.000000
+V12-4 2 23 |mlp| 23 23.000000
+V12-4 3 12 |dasdasda| 56 99.000000

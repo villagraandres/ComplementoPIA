@@ -5,18 +5,21 @@
 using namespace std;
 
 bool buscarArchivo(char numeroVenta[100], FILE *);
-bool existeNumero(int *arrf, int, int);
+bool existeNumero(char arrf[][20], char buscar[20], int tam);
 
 int main() 
 {
     char opcion;
     FILE *encabezadoVentas, *detalle_venta;
-    char numeroVenta[100], numeroVenta2[100], nombre[80], nombre2[80], fecha[50], descripcion[100], continuar;
-    int claveCliente, consecutivo = 1, claveArticulo, vistos[150],cantidad;
-    float precio,total=0;
+    char numeroVenta[100], numeroVenta2[100], nombre[80], nombre2[80], fecha[50], descripcion[100], continuar, claveArticulo[20],claveArticulo2[20];
+    int claveCliente, consecutivo = 1, cantidad;
+    char vistos[150][20];
+    float precio, total = 0;
     bool encontrado = false;
     regex patronVenta("^V\\d{2}-[1-9]$");
     regex patronNombre("^[a-zA-Z0-9 ]+$");
+    regex patronFecha("^(0[1-9]|1[0-9]|2[0-9]|30|31)/(0[1-9]|1[0-2])/\\d{4}$");
+    regex patronArticulo("^([1-9][0-9]?|100)$");
 
     cout << "a. Registro de Ventas" << endl;
     cout << "b. Total por articulo" << endl;
@@ -57,8 +60,11 @@ int main()
                     cout << "Ingrese el nombre" << endl;
                     cin.ignore();
                     cin.getline(nombre, sizeof(nombre));
-                    cout << "Ingrese la fecha" << endl;
-                    cin.getline(fecha, sizeof(fecha));
+                    do {
+                        cout << "Ingrese la fecha" << endl;
+                        cin.getline(fecha, sizeof(fecha));
+                    }while(!regex_match(fecha,patronFecha));
+
                     if (cin.fail()) 
                     {
                         throw "Se han ingresado datos invalidos";
@@ -72,7 +78,7 @@ int main()
                             cout << "Ingrese la clave del articulo" << endl;
                             cin >> claveArticulo;
                         }
-                        while (claveArticulo > 100 || claveArticulo < 1 || existeNumero(vistos, claveArticulo, consecutivo));
+                        while (existeNumero(vistos, claveArticulo, consecutivo) || !regex_match(claveArticulo, patronArticulo));
 
                         cout << "Ingrese la descripcion" << endl;
                         cin.ignore();
@@ -91,9 +97,9 @@ int main()
                             cin >> precio;
                         }
                         while (precio < 0);
-                        vistos[consecutivo] = claveArticulo;
+                        strcpy(vistos[consecutivo], claveArticulo);
 
-                        fprintf(detalle_venta, "%s %d %d |%s| %d %f\n", numeroVenta, consecutivo, claveArticulo, descripcion, cantidad, precio);
+                        fprintf(detalle_venta, "%s %d %s |%s| %d %f\n", numeroVenta, consecutivo, claveArticulo, descripcion, cantidad, precio);
                         consecutivo++;
 
                         cout << "Desea continuar? S:si N:no";
@@ -111,6 +117,50 @@ int main()
             break;
 
         case 'b':
+            encabezadoVentas = fopen("encabezado_venta.txt", "r");
+            detalle_venta = fopen("detalle_venta.txt", "r");
+            if (detalle_venta == NULL || encabezadoVentas == NULL)
+            {
+                printf("No existen datos");
+            }
+            else
+            {
+                do {
+                    cout<<"Ingrese la clave del articulo"<<endl;
+                    cin>>claveArticulo2;
+                }while(!regex_match(claveArticulo2,patronArticulo));
+
+                cout << left << setw(20) << "Descripcion"<< setw(15) << "Fecha"<< setw(20) << "Numero de venta"<< setw(15) << "Clave cliente"<< setw(20) << "Nombre cliente"<< setw(10) << "Cantidad"<< setw(10) << "Precio"<< setw(10) << "Subtotal" << endl;
+
+                while (fscanf(detalle_venta, "%s %d %s |%[^|]| %d %f", numeroVenta, &consecutivo, claveArticulo, descripcion, &cantidad, &precio) == 6)
+                {
+
+                    if (strcmp(claveArticulo, claveArticulo2) == 0)
+                    {
+                        rewind(encabezadoVentas);
+
+                        while (fscanf(encabezadoVentas, "%s %d |%[^|]| %s", numeroVenta2, &claveCliente, nombre, fecha) == 4 )
+                        {
+                            if(strcmp(numeroVenta,numeroVenta2)==0) {
+                                cout << left << setw(20) << descripcion
+                               << setw(15) << fecha
+                               << setw(20) << numeroVenta
+                               << setw(15) << claveCliente
+                               << setw(20) << nombre
+                               << setw(10) << cantidad
+                               << setw(10) << fixed << setprecision(2) << precio
+                               << setw(10) << fixed << setprecision(2) << (cantidad * precio) << endl;
+                            }
+
+                        }
+
+
+                    }
+                }
+
+
+            }
+
             break;
 
         case 'c':
@@ -128,7 +178,7 @@ int main()
             {
                 do 
                 {
-                    printf("Ingrese el nombre del usuario\n");
+                    cout << "Ingrese el nombre del usuario" << endl;
                     cin.ignore();
                     cin.getline(nombre2, sizeof(nombre2));
                     if (!regex_match(nombre2, patronNombre)) 
@@ -154,7 +204,7 @@ int main()
                 }
 
                 rewind(detalle_venta);
-                while (fscanf(detalle_venta, "%s %d %d |%[^|]| %d %f", numeroVenta, &consecutivo, &claveArticulo, descripcion, &cantidad, &precio) == 6)
+                while (fscanf(detalle_venta, "%s %d %s |%[^|]| %d %f", numeroVenta, &consecutivo, claveArticulo, descripcion, &cantidad, &precio) == 6)
                 {
                     if (strcmp(numeroVenta, numeroVenta2) == 0)
                     {
@@ -179,11 +229,11 @@ int main()
     return 0;
 }
 
-bool existeNumero(int *arrf, int buscar, int tam)
+bool existeNumero(char arrf[][20], char buscar[20], int tam)
 {
     for (int i = 0; i < tam; i++)
     {
-        if (*(arrf + i) == buscar)
+        if (strcmp(arrf[i], buscar) == 0)
         {
             return true;
         }
