@@ -26,6 +26,10 @@ int main()
     cout << "c. Detalle por cliente" << endl;
     cout << "d. Salir" << endl;
     cin >> opcion;
+    while(opcion!='d')
+    {
+
+
     switch (opcion) 
     {
         case 'a':
@@ -59,10 +63,13 @@ int main()
                         }
                     }
                     while (claveCliente < 100 || claveCliente > 200);
+                    do {
+                        cout << "Ingrese el nombre" << endl;
+                        cin.ignore();
+                        cin.getline(nombre, sizeof(nombre));
 
-                    cout << "Ingrese el nombre" << endl;
-                    cin.ignore();
-                    cin.getline(nombre, sizeof(nombre));
+                    }while(!regex_match(nombre,patronNombre));
+
                     do {
                         cout << "Ingrese la fecha" << endl;
                         cin.getline(fecha, sizeof(fecha));
@@ -136,7 +143,7 @@ int main()
                 do {
                     cout<<"Ingrese la clave del articulo"<<endl;
                     cin>>claveArticulo2;
-                }while(!regex_match(claveArticulo2,patronArticulo));
+                }while(!regex_match(claveArticulo2,patronArticulo) );
 
                 cout << left << setw(20) << "Descripcion"<< setw(15) << "Fecha"<< setw(20) << "Numero de venta"<< setw(15) << "Clave cliente"<< setw(20) << "Nombre cliente"<< setw(10) << "Cantidad"<< setw(10) << "Precio"<< setw(10) << "Subtotal" << endl;
                 try {
@@ -164,6 +171,7 @@ int main()
                                 if (cantidad > 1e6 || precio > 1e6) {
                                     throw "El cálculo del subtotal puede causar desbordamiento.";
                                 }
+                                total+=cantidad * precio;
                                cout<< setw(10) << fixed << setprecision(2) << (cantidad * precio) << endl;
                             }
 
@@ -176,6 +184,7 @@ int main()
 
                     }
                 }
+                    cout<<"El total es de: "<<total;
                 }catch(const char *e) {
                     cout<<e;
                 }
@@ -215,7 +224,20 @@ int main()
                 {
                     if (strcmp(nombre, nombre2) == 0)
                     {
+
                         encontrado = true;
+
+                        rewind(detalle_venta);
+                        while (fscanf(detalle_venta, "%s %d %s |%[^|]| %d %f", numeroVenta, &consecutivo, claveArticulo, descripcion, &cantidad, &precio) == 6)
+                        {
+                            if (strcmp(numeroVenta, numeroVenta2) == 0)
+                            {
+
+                                total+=precio*cantidad;
+                            }
+                        }
+
+
 
                     }
                 }
@@ -225,14 +247,7 @@ int main()
                     throw "No se encontro ningun resgitro con ese nombre";
                 }
 
-                rewind(detalle_venta);
-                while (fscanf(detalle_venta, "%s %d %s |%[^|]| %d %f", numeroVenta, &consecutivo, claveArticulo, descripcion, &cantidad, &precio) == 6)
-                {
-                    if (strcmp(numeroVenta, numeroVenta2) == 0)
-                    {
-                        total+=precio;
-                    }
-                }
+
                 cout<<"El total es de "<<endl;
                 cout.setf(ios::fixed);
                 cout.precision(4);
@@ -247,6 +262,12 @@ int main()
             fclose(encabezadoVentas);
             fclose(detalle_venta);
             break;
+    }
+        cout << "a. Registro de Ventas" << endl;
+        cout << "b. Total por articulo" << endl;
+        cout << "c. Detalle por cliente" << endl;
+        cout << "d. Salir" << endl;
+        cin >> opcion;
     }
     return 0;
 }
