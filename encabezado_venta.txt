@@ -1,4 +1,4 @@
-V12-1 101 |Pendejo de mierda| 2/02/2024
-V32-2 101 |Me la pela edna| 12/04/2023
-V21-2 101 |pendejo estpudio de cagada| 12/03/2024
-V12-4 103 |Estupido de cagada| 12/03/200
+V12-5 105 |Liam Gallagher| 12/05/2022
+V55-2 189 |Paul| 12/04/2022
+V33-5 104 |Cliente2| 12/04/1998
+V45-7 107 |Paul| 12/04/2006
